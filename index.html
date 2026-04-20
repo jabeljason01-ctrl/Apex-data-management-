@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CloudScale | Data Portal</title>
     <style>
         :root {
             --primary: #2563eb;
+            --success: #16a34a;
             --bg: #f8fafc;
             --card: #ffffff;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        .card { background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        h2 { color: #1e293b; margin-top: 0; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 2rem; }
-        input { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        button:hover { background: #1d4ed8; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f1f5f9; }
-        .status-tag { font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; background: #dcfce7; color: #166534; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2 { color: #1e293b; margin-top: 0; font-size: 1.5rem; }
+        
+        /* Mobile Responsive Input Group */
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        
+        .button-row { display: flex; gap: 10px; }
+        button { flex: 1; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        
+        .btn-sync { background: var(--primary); }
+        .btn-export { background: var(--success); }
+        button:active { transform: scale(0.98); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: #475569; }
+        .status-tag { font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; background: #dcfce7; color: #166534; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -30,53 +38,53 @@
 <div class="container">
     <div class="card">
         <h2>⚖️ Weighing Scale Portal</h2>
-        <p>Enter the reading from your scale to sync with the cloud database.</p>
+        <p style="color: #64748b; font-size: 0.9rem;">Log and export your scale readings.</p>
         
         <div class="input-group">
-            <input type="number" id="weightInput" placeholder="Enter weight (kg)..." step="0.01">
+            <input type="number" id="weightInput" placeholder="Enter weight (e.g. 50)">
             <input type="text" id="unitInput" placeholder="Unit (e.g. kg)" value="kg">
-            <button onclick="saveData()">Sync to Cloud</button>
+            <div class="button-row">
+                <button class="btn-sync" onclick="saveData()">Sync to Cloud</button>
+                <button class="btn-export" onclick="exportToExcel()">Export Excel</button>
+            </div>
         </div>
 
         <h3>Recent Sync History</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>Weight</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="dataTable">
-                </tbody>
-        </table>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reading</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // Initialize table on load
     window.onload = displayData;
 
     function saveData() {
         const weight = document.getElementById('weightInput').value;
         const unit = document.getElementById('unitInput').value;
         
-        if (!weight) return alert("Please enter a weight reading.");
+        if (!weight || !unit) return alert("Please fill in both weight and unit.");
 
         const entry = {
-            id: Date.now(),
             timestamp: new Date().toLocaleString(),
-            weight: weight + " " + unit,
-            status: "Cloud Synced"
+            weight: weight,
+            unit: unit,
+            status: "Synced"
         };
 
-        // Get existing data from "Cloud" (LocalStorage)
         let history = JSON.parse(localStorage.getItem('scaleData')) || [];
-        history.unshift(entry); // Add newest at the top
-        
+        history.unshift(entry);
         localStorage.setItem('scaleData', JSON.stringify(history));
         
-        // Clear input and refresh UI
         document.getElementById('weightInput').value = '';
         displayData();
     }
@@ -84,14 +92,35 @@
     function displayData() {
         const history = JSON.parse(localStorage.getItem('scaleData')) || [];
         const tableBody = document.getElementById('dataTable');
-        
         tableBody.innerHTML = history.map(item => `
             <tr>
                 <td>${item.timestamp}</td>
-                <td><strong>${item.weight}</strong></td>
+                <td><strong>${item.weight} ${item.unit}</strong></td>
                 <td><span class="status-tag">${item.status}</span></td>
             </tr>
         `).join('');
+    }
+
+    function exportToExcel() {
+        const history = JSON.parse(localStorage.getItem('scaleData')) || [];
+        if (history.length === 0) return alert("No data to export!");
+
+        // Create CSV Header
+        let csvContent = "data:text/csv;charset=utf-8,Timestamp,Weight,Unit,Status\n";
+
+        // Add Rows
+        history.forEach(item => {
+            csvContent += `${item.timestamp},${item.weight},${item.unit},${item.status}\n`;
+        });
+
+        // Download link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Scale_Data_Export.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 
