@@ -3,60 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudScale | Data Portal</title>
+    <title>Apex Solutions | Data Management</title>
     <style>
         :root {
             --primary: #2563eb;
             --success: #16a34a;
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --card: #ffffff;
+            --text: #1e293b;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); }
         .container { max-width: 600px; margin: auto; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        h2 { color: #1e293b; margin-top: 0; font-size: 1.5rem; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+        p { color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
         
-        /* Mobile Responsive Input Group */
-        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
-        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
+        .row { display: flex; gap: 10px; }
+        .row input { flex: 1; }
         
-        .button-row { display: flex; gap: 10px; }
-        button { flex: 1; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
         
+        .button-row { display: flex; gap: 10px; margin-top: 5px; }
+        button { flex: 1; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: opacity 0.2s; }
         .btn-sync { background: var(--primary); }
         .btn-export { background: var(--success); }
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.98); opacity: 0.9; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f1f5f9; color: #475569; }
-        .status-tag { font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; background: #dcfce7; color: #166534; font-weight: bold; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        h3 { margin: 0; font-size: 1.1rem; }
+        
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: white; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .client-info { color: #64748b; font-size: 0.75rem; display: block; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <h2>⚖️ Weighing Scale Portal</h2>
-        <p style="color: #64748b; font-size: 0.9rem;">Log and export your scale readings.</p>
+        <h2>⚖️ Apex Data Management</h2>
+        <p>Industrial scale logging portal for Apex Solutions technicians.</p>
         
         <div class="input-group">
-            <input type="number" id="weightInput" placeholder="Enter weight (e.g. 50)">
-            <input type="text" id="unitInput" placeholder="Unit (e.g. kg)" value="kg">
+            <input type="text" id="clientInput" placeholder="Client Name (e.g. Hamidu Scrap)">
+            <input type="text" id="scaleIdInput" placeholder="Scale ID/Model (e.g. Apex-001)">
+            
+            <div class="row">
+                <input type="number" id="weightInput" placeholder="Weight">
+                <input type="text" id="unitInput" placeholder="Unit" value="kg" style="flex: 0.4;">
+            </div>
+
             <div class="button-row">
-                <button class="btn-sync" onclick="saveData()">Sync to Cloud</button>
+                <button class="btn-sync" onclick="saveData()">Save Reading</button>
                 <button class="btn-export" onclick="exportToExcel()">Export Excel</button>
             </div>
         </div>
 
-        <h3>Recent Sync History</h3>
-        <div style="overflow-x: auto;">
+        <div class="history-header">
+            <h3>Recent Logs</h3>
+            <button onclick="clearLogs()" style="background:none; color:#ef4444; font-size:0.7rem; padding:0; flex:none;">Clear All</button>
+        </div>
+
+        <div class="table-container">
             <table>
                 <thead>
                     <tr>
+                        <th>Details</th>
+                        <th>Weight</th>
                         <th>Date</th>
-                        <th>Reading</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="dataTable"></tbody>
@@ -69,55 +87,66 @@
     window.onload = displayData;
 
     function saveData() {
+        const client = document.getElementById('clientInput').value || "General";
+        const scaleId = document.getElementById('scaleIdInput').value || "N/A";
         const weight = document.getElementById('weightInput').value;
         const unit = document.getElementById('unitInput').value;
         
-        if (!weight || !unit) return alert("Please fill in both weight and unit.");
+        if (!weight) return alert("Please enter a weight reading.");
 
         const entry = {
             timestamp: new Date().toLocaleString(),
+            client: client,
+            scaleId: scaleId,
             weight: weight,
-            unit: unit,
-            status: "Synced"
+            unit: unit
         };
 
-        let history = JSON.parse(localStorage.getItem('scaleData')) || [];
+        let history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
         history.unshift(entry);
-        localStorage.setItem('scaleData', JSON.stringify(history));
+        localStorage.setItem('apexScaleData', JSON.stringify(history));
         
+        // Reset weight only, keep client/scale for speed
         document.getElementById('weightInput').value = '';
         displayData();
     }
 
     function displayData() {
-        const history = JSON.parse(localStorage.getItem('scaleData')) || [];
+        const history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
         const tableBody = document.getElementById('dataTable');
         tableBody.innerHTML = history.map(item => `
             <tr>
-                <td>${item.timestamp}</td>
+                <td>
+                    <strong>${item.client}</strong>
+                    <span class="client-info">ID: ${item.scaleId}</span>
+                </td>
                 <td><strong>${item.weight} ${item.unit}</strong></td>
-                <td><span class="status-tag">${item.status}</span></td>
+                <td>${item.timestamp.split(',')[0]}</td>
             </tr>
         `).join('');
     }
 
+    function clearLogs() {
+        if(confirm("Are you sure you want to delete all saved logs?")) {
+            localStorage.removeItem('apexScaleData');
+            displayData();
+        }
+    }
+
     function exportToExcel() {
-        const history = JSON.parse(localStorage.getItem('scaleData')) || [];
+        const history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
         if (history.length === 0) return alert("No data to export!");
 
-        // Create CSV Header
-        let csvContent = "data:text/csv;charset=utf-8,Timestamp,Weight,Unit,Status\n";
+        let csvContent = "data:text/csv;charset=utf-8,Date/Time,Client,Scale ID,Weight,Unit\n";
 
-        // Add Rows
         history.forEach(item => {
-            csvContent += `${item.timestamp},${item.weight},${item.unit},${item.status}\n`;
+            csvContent += `"${item.timestamp}","${item.client}","${item.scaleId}","${item.weight}","${item.unit}"\n`;
         });
 
-        // Download link
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Scale_Data_Export.csv");
+        link.setAttribute("download", `Apex_Export_${new Date().toLocaleDateString()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
