@@ -3,55 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Solutions | Data Management</title>
+    <title>Apex Solutions | Data Portal</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --success: #16a34a;
-            --bg: #f1f5f9;
-            --card: #ffffff;
-            --text: #1e293b;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); }
-        .container { max-width: 700px; margin: auto; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
+        :root { --primary: #003366; --success: #16a34a; --bg: #f1f5f9; --card: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #1e293b; }
+        .container { max-width: 750px; margin: auto; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); text-align: center; }
         
-        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
+        /* Logo Styling */
+        .brand-header { margin-bottom: 20px; }
+        .logo-img { width: 120px; height: auto; margin-bottom: 10px; }
+        .brand-name { font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0; text-transform: uppercase; }
+        .brand-tagline { font-size: 0.75rem; color: #64748b; margin-top: 5px; font-style: italic; }
+
+        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; text-align: left; }
         .row { display: flex; gap: 10px; }
-        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
-        
-        .button-row { display: flex; gap: 10px; margin-top: 5px; }
-        button { flex: 1; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        .button-row { display: flex; gap: 10px; }
+        button { flex: 1; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         .btn-sync { background: var(--primary); }
         .btn-export { background: var(--success); }
-
-        .table-container { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: white; min-width: 500px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; }
-
-        /* Making the Date column wider */
-        .col-date { width: 180px; white-space: nowrap; }
-        .col-weight { width: 100px; font-weight: bold; color: var(--primary); }
-        .client-info { color: #64748b; font-size: 0.75rem; display: block; }
         
-        #statusMessage { color: var(--success); font-weight: bold; font-size: 0.8rem; height: 1.2rem; margin-bottom: 5px; text-align: center; }
+        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: white; min-width: 600px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; color: #64748b; }
+        .col-date { width: 200px; }
+        .col-weight { font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <h2>⚖️ Apex Data Management</h2>
-        <div id="statusMessage"></div>
-        
+        <div class="brand-header">
+            <img src="logo.png" alt="Apex Solutions Logo" class="logo-img">
+            <div class="brand-name">Apex Solutions</div>
+            <div class="brand-tagline">Precision • Compliance • Profit</div>
+        </div>
+
         <div class="input-group">
             <input type="text" id="clientInput" placeholder="Client Name">
-            <input type="text" id="scaleIdInput" placeholder="Scale ID/Model">
+            <input type="text" id="scaleIdInput" placeholder="Scale ID">
             <div class="row">
-                <input type="number" id="weightInput" placeholder="Weight">
+                <input type="number" id="weightInput" placeholder="Weight Value">
                 <input type="text" id="unitInput" placeholder="Unit" value="kg" style="flex: 0.3;">
             </div>
             <div class="button-row">
@@ -65,14 +60,14 @@
                 <thead>
                     <tr>
                         <th class="col-date">Date & Time</th>
-                        <th>Client Details</th>
-                        <th class="col-weight">Weight</th>
+                        <th>Client/Scale</th>
+                        <th class="col-weight">Reading</th>
                     </tr>
                 </thead>
                 <tbody id="dataTable"></tbody>
             </table>
         </div>
-        <button onclick="clearLogs()" style="background:none; color:#ef4444; font-size:0.7rem; margin-top: 15px; width: auto; border: 1px solid #fee2e2; padding: 5px 10px;">Clear Data</button>
+        <button onclick="clearLogs()" style="background:none; color:#ef4444; font-size:0.7rem; border:none; margin-top:15px; cursor:pointer;">Clear All Data</button>
     </div>
 </div>
 
@@ -80,69 +75,52 @@
     window.onload = displayData;
 
     function saveData() {
-        const client = document.getElementById('clientInput').value || "General";
-        const scaleId = document.getElementById('scaleIdInput').value || "N/A";
         const weight = document.getElementById('weightInput').value;
-        const unit = document.getElementById('unitInput').value;
-        
-        if (!weight) return alert("Please enter weight.");
+        if (!weight) return alert("Enter weight");
 
         const entry = {
-            timestamp: new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            client: client,
-            scaleId: scaleId,
+            timestamp: new Date().toLocaleString('en-GB'),
+            client: document.getElementById('clientInput').value || "General",
+            scaleId: document.getElementById('scaleIdInput').value || "N/A",
             weight: weight,
-            unit: unit
+            unit: document.getElementById('unitInput').value || "kg"
         };
 
         let history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
         history.unshift(entry);
         localStorage.setItem('apexScaleData', JSON.stringify(history));
-        
         document.getElementById('weightInput').value = '';
-        document.getElementById('statusMessage').innerText = "✓ Saved Successfully";
-        setTimeout(() => { document.getElementById('statusMessage').innerText = ""; }, 2000);
-        
         displayData();
     }
 
     function displayData() {
         const history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
-        const tableBody = document.getElementById('dataTable');
-        tableBody.innerHTML = history.map(item => `
+        document.getElementById('dataTable').innerHTML = history.map(item => `
             <tr>
                 <td class="col-date">${item.timestamp}</td>
-                <td>
-                    <strong>${item.client}</strong>
-                    <span class="client-info">ID: ${item.scaleId}</span>
-                </td>
+                <td><strong>${item.client}</strong><br><small>ID: ${item.scaleId}</small></td>
                 <td class="col-weight">${item.weight} ${item.unit}</td>
             </tr>
         `).join('');
     }
 
-    function clearLogs() {
-        if(confirm("Clear all logs?")) {
-            localStorage.removeItem('apexScaleData');
-            displayData();
-        }
-    }
-
     function exportToExcel() {
         const history = JSON.parse(localStorage.getItem('apexScaleData')) || [];
-        if (history.length === 0) return alert("No data!");
-        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Client,Scale ID,Weight,Unit\n";
+        if (history.length === 0) return;
+        let csvContent = "\uFEFFDate,Time,Client,ScaleID,Weight,Unit\n";
         history.forEach(item => {
-            const [date, time] = item.timestamp.split(', ');
-            csvContent += `"${date}","${time}","${item.client}","${item.scaleId}","${item.weight}","${item.unit}"\n`;
+            const parts = item.timestamp.split(', ');
+            csvContent += `"${parts[0]}","${parts[1]||""}","${item.client}","${item.scaleId}","${item.weight}","${item.unit}"\n`;
         });
-        const encodedUri = encodeURI(csvContent);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Apex_Report.csv");
-        document.body.appendChild(link);
+        link.href = URL.createObjectURL(blob);
+        link.download = "Apex_Scale_Report.csv";
         link.click();
-        document.body.removeChild(link);
+    }
+
+    function clearLogs() {
+        if(confirm("Delete all?")) { localStorage.removeItem('apexScaleData'); displayData(); }
     }
 </script>
 
